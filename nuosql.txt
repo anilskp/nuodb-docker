@@ -1,0 +1,23 @@
+docker run -d --name nuodb1 -h nuodb1 -P  -p 48005:48006  \
+   -e DOMAIN_PASSWORD=domain_pwd \
+   -e AGENT_PORT=48004 \
+   -e START_REST_SVC=true \
+   anilskp/nuodb2.5 
+
+
+docker inspect --format '{{ .NetworkSettings.IPAddress}}' 266c53c10c2c
+
+
+
+
+/opt/nuodb/bin/nuodbmgr --broker 172.17.0.2 --password domain_pwd
+
+docker run -d --name nuodb2 -h nuodb2 --link nuodb1:nuodb1 \
+   -P -p 48008:48009  \
+   -e DOMAIN_PASSWORD=domain_pwd \
+   -e AGENT_PORT=48007 \
+   -e AGENT_PEER=nuodb1 \
+    anilskp/nuodb2.5 
+
+
+/opt/nuodb/bin/nuosql --user db1 --password db1 db1@nuodb1:48007

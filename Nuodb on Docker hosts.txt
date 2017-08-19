@@ -1,0 +1,47 @@
+docker run -d --name nuodb1 --network=host -h  10.0.67.3 -p 8888:8888 -p 8080:8080 -p 48004:48004  -p 48005:48005  \
+   -e DOMAIN_PASSWORD=domain_pwd \
+   -e AGENT_PORT=48004 \
+   -e START_REST_SVC=true \
+   anilskp/nuodb2.5 
+
+
+docker inspect --format '{{ .NetworkSettings.IPAddress}}' 266c53c10c2c
+
+
+
+
+/opt/nuodb/bin/nuodbmgr --broker 10.0.67.3  --password domain_pwd
+
+docker run -d --name nuodb2 --network=host -h 10.0.67.4 \
+   -p 48008:48008 -p 48007:48007 \
+   -e DOMAIN_PASSWORD=domain_pwd \
+   -e AGENT_PORT=48007 \
+   -e AGENT_PEER=10.0.67.3 \
+    anilskp/nuodb2.5 
+/opt/nuodb/bin/nuodbmgr --broker 10.0.148.4:48007 --password domain_pwd
+
+/opt/nuodb/bin/nuosql --user db1 --password db1 db1@10.0.148.3:48004
+/opt/nuodb/bin/nuosql --user db1 --password db1 db1@10.0.148.4:48007
+
+
+docker run -d --name nuodb3 --network=host -h 10.0.148.5   \
+   -p 48008:48008 -p 48007:48007 \
+   -e DOMAIN_PASSWORD=domain_pwd \
+   -e AGENT_PORT=48007 \
+   -e AGENT_PEER=10.0.67.3 \
+    anilskp/nuodb2.5
+
+/opt/nuodb/bin/nuosql --user db1 --password db1 db1@10.0.67.5:48007
+
+
+/opt/nuodb/bin/nuodbmgr --broker 10.0.67.5:48007 --password domain_pwd
+start process sm host localhost database db1
+
+--dba-user db2 --dba-password db2
+
+
+--Create domain admin user
+
+create domain administrator
+
+/opt/nuodb/bin/nuodbmgr --broker 10.0.67.3  --password domain_pwd
